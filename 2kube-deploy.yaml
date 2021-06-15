@@ -63,7 +63,7 @@ kind: Deployment
 metadata:
   name: db
   namespace: vote
- labels:
+  labels:
     app: db
 spec:
   replicas: 1
@@ -95,6 +95,8 @@ spec:
       - name: db-data
         persistentVolumeClaim:
           claimName: postgres-pv-claim
+      nodeSelector:
+        kubernetes.io/hostname: worker-node3
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -126,6 +128,10 @@ spec:
     name: result-service
   selector:
     app: result
+status:
+  loadBalancer:
+    ingress:
+    - ip: 203.0.113.10
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -227,3 +233,4 @@ spec:
       containers: 
       - image: bretfisher/examplevotingapp_worker:java
         name: worker
+

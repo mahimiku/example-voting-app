@@ -63,7 +63,7 @@ kind: Deployment
 metadata:
   name: db
   namespace: vote
- labels:
+  labels:
     app: db
 spec:
   replicas: 1
@@ -227,3 +227,4 @@ spec:
       containers: 
       - image: bretfisher/examplevotingapp_worker:java
         name: worker
+

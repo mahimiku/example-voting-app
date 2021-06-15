@@ -63,7 +63,7 @@ kind: Deployment
 metadata:
   name: db
   namespace: vote
- labels:
+  labels:
     app: db
 spec:
   replicas: 1
@@ -95,6 +95,30 @@ spec:
       - name: db-data
         persistentVolumeClaim:
           claimName: postgres-pv-claim
+      nodeSelector:
+        kubernetes.io/hostname: worker-node3
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-local-pv-1
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: my-local-storage
+  local:
+    path: /data/volumes/postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node3
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -120,12 +144,16 @@ metadata:
     app: result
 spec:
   type: LoadBalancer
+  externalIPs:
+  - 192.168.122.3
   ports:
   - port: 5001
     targetPort: 80
     name: result-service
   selector:
     app: result
+status:
+  loadBalancer:
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -162,6 +190,8 @@ metadata:
     apps: vote
 spec:
   type: LoadBalancer
+  externalIPs:
+  - 192.168.122.2
   ports:
     - port: 5000
       targetPort: 80
@@ -227,3 +257,4 @@ spec:
       containers: 
       - image: bretfisher/examplevotingapp_worker:java
         name: worker
+
